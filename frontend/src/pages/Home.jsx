@@ -8,39 +8,58 @@ function Home() {
   const [movies, setMovies] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isSearchActive, setIsSearchActive] = useState(false);
 
   useEffect(() => {
     const loadPopularMovies = async () => {
       try {
-        const popularMovies = await getPopularMovies();
-        setMovies(popularMovies);
+        const { results, total_pages } = await getPopularMovies(currentPage);
+        setMovies(results);
+        setTotalPages(total_pages);
+        setIsSearchActive(false);
       } catch (err) {
         console.log(err);
-        setError("Failed to load movies...");
+        setError("Failed to load movies. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
     loadPopularMovies();
-  }, []);
+  }, [currentPage]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return
-    if (loading) return
+    if (!searchQuery.trim()) return;
+    if (loading) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
-        const searchResults = await searchMovies(searchQuery)
-        setMovies(searchResults)
-        setError(null)
+      const { results, total_pages } = await searchMovies(searchQuery, currentPage);
+      setMovies(results);
+      setTotalPages(total_pages);
+      setError(null);
+      setIsSearchActive(true);
     } catch (err) {
-        console.log(err)
-        setError("Failed to search movies...")
+      console.log(err);
+      setError("Failed to search movies. Please check your connection.");
     } finally {
-        setLoading(false)
+      setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const returnToPopular = () => {
+    setSearchQuery("");
+    setCurrentPage(1);
+    setIsSearchActive(false);
   };
 
   return (
@@ -53,21 +72,62 @@ function Home() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button type="submit" className="search-button">
-          Search
+        <button type="submit" className="search-button" disabled={loading}>
+          {loading ? "Searching..." : "Search"}
         </button>
+        {isSearchActive && (
+          <button
+            type="button"
+            className="popular-button"
+            onClick={returnToPopular}
+            disabled={loading}
+          >
+            Back to Popular
+          </button>
+        )}
       </form>
 
-        {error && <div className="error-message">{error}</div>}
+      {error && <div className="error-message">{error}</div>}
 
       {loading ? (
-        <div className="loading">Loading...</div>
-      ) : (
-        <div className="movies-grid">
-          {movies.map((movie) => (
-            <MovieCard movie={movie} key={movie.id} />
-          ))}
+        <div className="loading">
+          <div className="spinner"></div>
+          Loading movies...
         </div>
+      ) : (
+        <>
+          <div className="movies-grid">
+            {movies.length > 0 ? (
+              movies.map((movie) => (
+                <MovieCard movie={movie} key={movie.id} />
+              ))
+            ) : (
+              <div className="no-results">
+                No movies found. Try a different search.
+              </div>
+            )}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || loading}
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || loading}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
