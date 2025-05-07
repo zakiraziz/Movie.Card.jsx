@@ -5,32 +5,74 @@
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
   }
   
   .navbar-brand {
     font-size: 1.5rem;
     font-weight: bold;
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   
   .navbar-links {
     display: flex;
     gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
   
   .nav-link {
     font-size: 1rem;
     padding: 0.5rem 1rem;
     border-radius: 4px;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    color: #ffffff;
+    text-decoration: none;
+    cursor: pointer;
   }
   
   .nav-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+  }
+  
+  .navbar-cta {
+    background-color: #4CAF50;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    margin-left: 1rem;
+  }
+  
+  .navbar-cta:hover {
+    background-color: #3e8e41;
+  }
+  
+  .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
   }
   
   @media (max-width: 768px) {
     .navbar {
       padding: 1rem;
+      position: relative;
     }
   
     .navbar-brand {
@@ -38,10 +80,37 @@
     }
   
     .navbar-links {
-      gap: 1rem;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: #000000;
+      flex-direction: column;
+      gap: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  
+    .navbar-links.active {
+      max-height: 500px;
+      padding: 1rem 0;
     }
   
     .nav-link {
-      padding: 0.5rem;
+      padding: 1rem;
+      width: 100%;
+      text-align: center;
+      border-radius: 0;
+    }
+  
+    .mobile-menu-btn {
+      display: block;
+    }
+  
+    .navbar-cta {
+      margin-left: 0;
+      margin-top: 0.5rem;
     }
   }
